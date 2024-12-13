@@ -1,5 +1,9 @@
+import TradingPairDetails from "./TradingPairDetails";
+
 const Main = () => (
-  <div className="flex flex-1"></div>
+  <div>
+    <TradingPairDetails />
+  </div>
 );
 
 export default Main;

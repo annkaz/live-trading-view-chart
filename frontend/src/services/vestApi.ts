@@ -17,6 +17,16 @@ type Depth = {
   asks: [string, string][];
 };
 
+type CombinedTickerData = {
+  symbol: string;
+  price: string;
+  priceChange: string;
+  priceChangePercent: string;
+  oneHrFundingRate: string;
+  openInterestBidPrice: string;
+  openInterestAskPrice: string;
+};
+
 export const fetchLatestTicker = async (
   symbol: string
 ): Promise<LatestTicker | null> => {
@@ -51,4 +61,32 @@ export const fetchDepth = async (symbol: string): Promise<Depth | null> => {
   }
   const data = await response.json();
   return data;
+};
+
+export const fetchTradingPairInfo = async (
+  symbol: string
+): Promise<CombinedTickerData | null> => {
+  try {
+    const [latestTicker, dailyTicker, depth] = await Promise.all([
+      fetchLatestTicker(symbol),
+      fetch24hrTicker(symbol),
+      fetchDepth(symbol),
+    ]);
+
+    if (!latestTicker || !dailyTicker || !depth) {
+      return null;
+    }
+
+    return {
+      symbol: latestTicker.symbol,
+      price: latestTicker.markPrice,
+      priceChange: dailyTicker.priceChange,
+      priceChangePercent: dailyTicker.priceChangePercent,
+      oneHrFundingRate: latestTicker.oneHrFundingRate,
+      openInterestBidPrice: depth.bids[0][0],
+      openInterestAskPrice: depth.bids[0][0],
+    };
+  } catch (err) {
+    throw new Error("Failed to fetch trading pair info");
+  }
 };

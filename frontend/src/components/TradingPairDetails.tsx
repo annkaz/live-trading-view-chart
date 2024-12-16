@@ -6,7 +6,7 @@ const SYMBOL = "ETH-PERP";
 
 const TradingPairDetails = () => {
   const { data } = useQuery({
-    queryKey: ["posts"],
+    queryKey: ["pairInfo", SYMBOL],
     queryFn: () => fetchTradingPairInfo(SYMBOL),
   });
 
@@ -22,20 +22,22 @@ const TradingPairDetails = () => {
         <div className="text-sm text-gray-400">PRICE</div>
         <div className="font-semibold">${data.price}</div>
       </div>
-      <div>
-        <div className="text-sm text-gray-400">24H CHANGE</div>
-        <div
-          className={`font-semibold ${
-            data.dailyPriceChange.startsWith("-")
-              ? "text-red-500"
-              : "text-green-500"
-          }`}
-        >
-          {`${parseFloat(data.dailyPriceChange).toFixed(3)}/${
-            data.dailyPriceChangePercent
-          }%`}
+      {data.dailyPriceChange && data.dailyPriceChangePercent && (
+        <div>
+          <div className="text-sm text-gray-400">24H CHANGE</div>
+          <div
+            className={`font-semibold ${
+              data.dailyPriceChange.startsWith("-")
+                ? "text-red-500"
+                : "text-green-500"
+            }`}
+          >
+            {`${parseFloat(data.dailyPriceChange).toFixed(3)}/${
+              data.dailyPriceChangePercent
+            }%`}
+          </div>
         </div>
-      </div>
+      )}
       <div>
         <div className="text-sm text-gray-400">1H FUNDING</div>
         <div className="font-semibold text-green-500">

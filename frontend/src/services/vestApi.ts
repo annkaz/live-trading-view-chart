@@ -12,11 +12,6 @@ type DailyTicker = {
   priceChangePercent: string;
 };
 
-type Depth = {
-  bids: [string, string][];
-  asks: [string, string][];
-};
-
 type CombinedTickerData = {
   symbol: string;
   price: string;
@@ -24,6 +19,18 @@ type CombinedTickerData = {
   dailyPriceChangePercent: string;
   oneHrFundingRate: string;
 };
+
+type Candle = [
+  number, // open time
+  string, // open price
+  string, // high price
+  string, // low price
+  string, // close price
+  number, // close time
+  string, // volume
+  string, // quote volume
+  number // number of trades
+];
 
 export const fetchLatestTicker = async (
   symbol: string
@@ -87,4 +94,32 @@ export const fetchTradingPairInfo = async (
   } catch (err) {
     throw new Error("Failed to fetch trading pair info");
   }
+};
+
+export const fetchCandlestickData = async (
+  symbol: string,
+  limit: number = 1000
+) => {
+  const response = await fetch(
+    `${VEST_API}/klines?symbol=${symbol}&interval=1m&limit=${limit}`,
+    {
+      method: "GET",
+      headers: {
+        xrestservermm: `restserver0`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch historical candlestick data");
+  }
+  const data = await response.json();
+
+  return data.map((candle: Candle) => ({
+    time: Math.floor(candle[0] / 1000),
+    open: parseFloat(candle[1]),
+    high: parseFloat(candle[2]),
+    low: parseFloat(candle[3]),
+    close: parseFloat(candle[4]),
+  }));
 };

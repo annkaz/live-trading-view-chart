@@ -1,17 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { createChart, ISeriesApi, UTCTimestamp } from "lightweight-charts";
-import React, { useEffect, useRef } from "react";
-import { fetchCandlestickData } from "../services/vestApi";
-
-type CandlestickChartProps = {
-  data: Array<{
-    time: UTCTimestamp;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-  }>;
-};
+import { useEffect, useRef } from "react";
+import { useKlines } from "../hooks/useKlines";
 
 const SYMBOL = "ETH-PERP";
 
@@ -19,15 +8,18 @@ const CandlestickChart = () => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const candlestickSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
-  const { data } = useQuery({
-    queryKey: ["candlestickData", SYMBOL],
-    queryFn: () => fetchCandlestickData(SYMBOL),
-  });
+  const handleInitialKlinesData = (initialData: any) => {
+    candlestickSeriesRef.current?.setData(initialData);
+  };
+
+  const handleKlinesDataUpdate = (newCandle: any) => {
+    candlestickSeriesRef.current?.update(newCandle);
+  };
 
   useEffect(() => {
-    if (!data || !chartContainerRef.current) return;
+    if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current!, {
+    const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: 500,
       layout: {
@@ -39,13 +31,14 @@ const CandlestickChart = () => {
         horzLines: { color: "#424242" },
       },
     });
+
     const candlestickSeries = chart.addCandlestickSeries();
     candlestickSeriesRef.current = candlestickSeries;
 
-    candlestickSeries.setData(data);
-
     return () => chart.remove();
-  }, [data]);
+  }, []);
+
+  useKlines(SYMBOL, handleInitialKlinesData, handleKlinesDataUpdate);
 
   return <div className="flex-1" ref={chartContainerRef} />;
 };

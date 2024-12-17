@@ -4,9 +4,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        appBackground: "#1A1A1A",
+        appBackground: "#000000",
         appText: "#F2F1F0",
         red: "#FF5A44",
+        teal: "#4BC2A3",
+        deepCharcoal: "#161514",
       },
       fontFamily: {
         mono: ["IBM Plex Mono", "monospace"],

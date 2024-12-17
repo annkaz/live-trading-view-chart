@@ -31,7 +31,7 @@ const CandlestickChart = () => {
       width: chartContainerRef.current.clientWidth,
       height: 500,
       layout: {
-        background: { color: "#1A1A1A" },
+        background: { color: "#161514" },
         textColor: "#AEADAD",
       },
       grid: {
@@ -47,7 +47,7 @@ const CandlestickChart = () => {
     return () => chart.remove();
   }, [data]);
 
-  return <div className="flex-1 h-[400px]" ref={chartContainerRef} />;
+  return <div className="flex-1" ref={chartContainerRef} />;
 };
 
 export default CandlestickChart;

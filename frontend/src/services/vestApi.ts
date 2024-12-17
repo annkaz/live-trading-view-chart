@@ -1,3 +1,5 @@
+import { UTCTimestamp } from "lightweight-charts";
+
 const VEST_API = "https://serverprod.vest.exchange/v2";
 
 type LatestTicker = {
@@ -31,6 +33,14 @@ type Candle = [
   string, // quote volume
   number // number of trades
 ];
+
+type CandlestickData = {
+  time: UTCTimestamp;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+};
 
 export const fetchLatestTicker = async (
   symbol: string
@@ -99,7 +109,7 @@ export const fetchTradingPairInfo = async (
 export const fetchCandlestickData = async (
   symbol: string,
   limit: number = 1000
-) => {
+): Promise<CandlestickData[]> => {
   const response = await fetch(
     `${VEST_API}/klines?symbol=${symbol}&interval=1m&limit=${limit}`,
     {
@@ -116,7 +126,7 @@ export const fetchCandlestickData = async (
   const data = await response.json();
 
   return data.map((candle: Candle) => ({
-    time: Math.floor(candle[0] / 1000),
+    time: Math.floor(candle[0] / 1000) as UTCTimestamp,
     open: parseFloat(candle[1]),
     high: parseFloat(candle[2]),
     low: parseFloat(candle[3]),

@@ -30,6 +30,9 @@ const CandlestickChart = () => {
         vertLines: { color: "#424242" },
         horzLines: { color: "#424242" },
       },
+      timeScale: {
+        timeVisible: true,
+      },
     });
 
     const candlestickSeries = chart.addCandlestickSeries();

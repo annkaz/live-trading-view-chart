@@ -9,6 +9,7 @@ module.exports = {
         red: "#FF5A44",
         teal: "#4BC2A3",
         deepCharcoal: "#161514",
+        resinBlack: "#252525",
       },
       fontFamily: {
         mono: ["IBM Plex Mono", "monospace"],

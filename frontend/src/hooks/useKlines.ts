@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { UTCTimestamp } from "lightweight-charts";
 import { useEffect } from "react";
 import { useWebSocket } from "../context/WebSocketProvider";
@@ -11,18 +12,18 @@ export const useKlines = (
   const { subscribe } = useWebSocket();
 
   // Fetch initial data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const initialData = await fetchCandlestickData(symbol);
-        onInitialData(initialData);
-      } catch (error) {
-        console.error("Failed to fetch initial candlestick data:", error);
-      }
-    };
+  const { data, isSuccess, isError, error } = useQuery({
+    queryKey: ["candlestickData", symbol],
+    queryFn: () => fetchCandlestickData(symbol),
+  });
 
-    fetchData();
-  }, [symbol, onInitialData]);
+  useEffect(() => {
+    if (isSuccess && data) {
+      onInitialData(data);
+    } else if (isError) {
+      console.error("Failed to fetch initial candlestick data:", error);
+    }
+  }, [isSuccess, isError, data, onInitialData, error]);
 
   // Subscribe to WebSocket updates
   useEffect(() => {

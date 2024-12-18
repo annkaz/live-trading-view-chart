@@ -1,14 +1,21 @@
 import { useState } from "react";
-import Dropdown from "../../ui/Dropdown";
+import Dropdown, { DropdownOption } from "../../ui/Dropdown";
+
+const DEFAULT_ORDER_TYPE = { value: "market", label: "MARKET" };
+const AVAILABLE_ORDER_TYPES = [
+  { value: "market", label: "MARKET" },
+  { value: "limit", label: "LIMIT" },
+];
 
 const OrderTypeAndPrice = () => {
-  const [orderType, setOrderType] = useState<string>("MARKET");
+  const [orderType, setOrderType] =
+    useState<DropdownOption>(DEFAULT_ORDER_TYPE);
 
   return (
     <div className="relative mb-4">
       <div className="flex justify-between">
         <Dropdown
-          options={["MARKET", "LIMIT"]}
+          options={AVAILABLE_ORDER_TYPES}
           selected={orderType}
           onSelect={setOrderType}
           label="Order type"

@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 
+export type DropdownOption = {
+  label: string;
+  value: string;
+};
+
 type DropdownProps = {
-  options: string[];
-  selected: string;
-  onSelect: (value: string) => void;
+  options: DropdownOption[];
+  selected: DropdownOption;
+  onSelect: (value: DropdownOption) => void;
   label?: string;
 };
 
@@ -19,7 +24,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: DropdownOption) => {
     onSelect(value);
     setIsOpen(false);
   };
@@ -49,10 +54,10 @@ const Dropdown: React.FC<DropdownProps> = ({
     <div ref={dropdownRef} className="relative">
       {label && <p className="text-gray-400 text-sm mb-1">{label}</p>}
       <div
-        className="relative bg-gray-800 p-2 rounded-md text-white w-32 cursor-pointer flex justify-between items-center"
+        className="relative bg-gray-800 p-2 rounded-md text-white w-36 cursor-pointer flex justify-between items-center"
         onClick={toggleDropdown}
       >
-        <span>{selected}</span>
+        <span>{selected.label}</span>
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
       </div>
 
@@ -64,11 +69,11 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           {options.map((option) => (
             <li
-              key={option}
+              key={option.label}
               className="p-2 hover:bg-gray-700 cursor-pointer text-sm"
               onClick={() => handleSelect(option)}
             >
-              {option}
+              {option.label}
             </li>
           ))}
         </ul>

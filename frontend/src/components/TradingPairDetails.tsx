@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
-import EthereumIcon from "../assets/EthereumIcon";
 import { useWebSocket } from "../context/WebSocketProvider";
 import { fetchTradingPairInfo } from "../services/vestApi";
 import Dropdown from "../ui/Dropdown";
 
-const DEFAULT_SYMBOL = "ETH-PERP";
+type TradingPairSymbol = {
+  label: string;
+  value: string;
+};
+
+const DEFAULT_SYMBOL: TradingPairSymbol = {
+  value: "ETH-PERP",
+  label: "ETH / USDC",
+};
 
 type PairData = {
   price: string;
@@ -15,15 +22,18 @@ type PairData = {
 
 const TradingPairDetails = () => {
   const [pairData, setPairData] = useState<PairData | null>(null);
-  const [availableSymbols, setAvailableSymbols] = useState<string[]>([]);
-  const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL);
+  const [availableSymbols, setAvailableSymbols] = useState<TradingPairSymbol[]>(
+    []
+  );
+  const [selectedSymbol, setSelectedSymbol] =
+    useState<TradingPairSymbol>(DEFAULT_SYMBOL);
 
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const data = await fetchTradingPairInfo(selectedSymbol);
+        const data = await fetchTradingPairInfo(selectedSymbol.value);
         setPairData(data);
       } catch (error) {
         console.error("Error fetching trading pair info:", error);
@@ -36,7 +46,10 @@ const TradingPairDetails = () => {
   useEffect(() => {
     const handleWebSocketUpdate = (data: any[]) => {
       // Fetch data for available symbols dropdown
-      const symbols = data.map((item: any) => item.symbol);
+      const symbols = data.map((item: any) => ({
+        value: item.symbol,
+        label: item.symbol.replace("-PERP", " / USDC"),
+      }));
       // Make sure to populate only once
       setAvailableSymbols((prev) =>
         prev.length === 0 ? Array.from(new Set(symbols)) : prev
@@ -63,27 +76,17 @@ const TradingPairDetails = () => {
 
   // Update the document title whenever the price changes
   useEffect(() => {
-    document.title = `${pairData?.price} | ${selectedSymbol} | Vest`;
+    document.title = `${pairData?.price} | ${selectedSymbol.value} | Vest`;
   }, [pairData?.price, selectedSymbol]);
 
   if (!pairData) return null;
 
   return (
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">
-      {/* <div className="flex items-center space-x-2">
-        <EthereumIcon />
-        <span className="font-semibold">{selectedSymbol}</span>
-      </div> */}
       <Dropdown
-        options={availableSymbols.map((symbol) =>
-          symbol.replace("-PERP", "/USDC").toUpperCase()
-        )}
+        options={availableSymbols}
         selected={selectedSymbol}
-        onSelect={() =>
-          setSelectedSymbol(
-            selectedSymbol.replace("/USDC", "-PERP").toUpperCase()
-          )
-        }
+        onSelect={setSelectedSymbol}
         label="Order type"
       />
       <div>

@@ -51,9 +51,12 @@ const TradingPairDetails = () => {
     };
   }, [subscribe]);
 
-  if (!pairData) return null;
+  // Update the document title whenever the price changes
+  useEffect(() => {
+    document.title = `${pairData?.price} | ${SYMBOL} | Vest`;
+  }, [pairData?.price]);
 
-  console.log("d", !pairData.dailyPriceChange.startsWith("-"));
+  if (!pairData) return null;
 
   return (
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">

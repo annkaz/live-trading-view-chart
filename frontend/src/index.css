@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 body {
-  @apply bg-appBackground text-appText font-mono antialiased box-border m-0 p-4;
+  @apply bg-appBackground text-appText font-mono antialiased box-border m-0 py-4 px-8;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }

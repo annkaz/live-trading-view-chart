@@ -1,16 +1,59 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import EthereumIcon from "../assets/EthereumIcon";
+import { useWebSocket } from "../context/WebSocketProvider";
 import { fetchTradingPairInfo } from "../services/vestApi";
 
 const SYMBOL = "ETH-PERP";
 
-const TradingPairDetails = () => {
-  const { data } = useQuery({
-    queryKey: ["pairInfo", SYMBOL],
-    queryFn: () => fetchTradingPairInfo(SYMBOL),
-  });
+type PairData = {
+  price: string;
+  dailyPriceChange: string;
+  dailyPriceChangePercent: string;
+  oneHrFundingRate: string;
+};
 
-  if (!data) return null;
+const TradingPairDetails = () => {
+  const [pairData, setPairData] = useState<PairData | null>(null);
+
+  const { subscribe } = useWebSocket();
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const data = await fetchTradingPairInfo(SYMBOL);
+        setPairData(data);
+      } catch (error) {
+        console.error("Error fetching trading pair info:", error);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const handleWebSocketUpdate = (data: any[]) => {
+      const ticker = data.find((item: any) => item.symbol === SYMBOL);
+      if (ticker) {
+        setPairData((prevData) => ({
+          ...prevData,
+          price: ticker.markPrice,
+          dailyPriceChange: ticker.priceChange,
+          dailyPriceChangePercent: ticker.priceChangePercent,
+          oneHrFundingRate: ticker.oneHrFundingRate,
+        }));
+      }
+    };
+
+    subscribe("tickers", handleWebSocketUpdate);
+
+    return () => {
+      subscribe("tickers", () => {});
+    };
+  }, [subscribe]);
+
+  if (!pairData) return null;
+
+  console.log("d", !pairData.dailyPriceChange.startsWith("-"));
 
   return (
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">
@@ -20,37 +63,37 @@ const TradingPairDetails = () => {
       </div>
       <div>
         <div className="text-sm text-gray-400">PRICE</div>
-        <div className="font-semibold">${data.price}</div>
+        <div className="font-semibold">${pairData.price}</div>
       </div>
-      {data.dailyPriceChange && data.dailyPriceChangePercent && (
+      {pairData.dailyPriceChange && pairData.dailyPriceChangePercent && (
         <div>
           <div className="text-sm text-gray-400">24H CHANGE</div>
           <div
             className={`font-semibold ${
-              data.dailyPriceChange.startsWith("-")
-                ? "text-red-500"
-                : "text-green-500"
+              pairData.dailyPriceChange.startsWith("-")
+                ? "text-red"
+                : "text-teal"
             }`}
           >
-            {`${parseFloat(data.dailyPriceChange).toFixed(3)}/${
-              data.dailyPriceChangePercent
+            {`${parseFloat(pairData.dailyPriceChange).toFixed(3)}/${
+              pairData.dailyPriceChangePercent
             }%`}
           </div>
         </div>
       )}
       <div>
         <div className="text-sm text-gray-400">1H FUNDING</div>
-        <div className="font-semibold text-green-500">
-          {data.oneHrFundingRate}%
+        <div className="font-semibold text-teal">
+          {pairData.oneHrFundingRate}%
         </div>
       </div>
       <div>
         <div className="text-sm text-gray-400">LONG OPEN INTEREST</div>
-        <div className="font-semibold text-green-500">8.871 ETH</div>
+        <div className="font-semibold text-teal">8.871 ETH</div>
       </div>
       <div>
         <div className="text-sm text-gray-400">SHORT OPEN INTEREST</div>
-        <div className="font-semibold text-green-500">8.871 ETH</div>
+        <div className="font-semibold text-teal">8.871 ETH</div>
       </div>
     </div>
   );

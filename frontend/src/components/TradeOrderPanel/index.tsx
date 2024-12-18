@@ -7,18 +7,20 @@ import TradeDetails from "./TradeDetails";
 import TradeToggle from "./TradeToggle";
 
 const TradeOrderPanel = () => {
-  const [isLong, setIsLong] = useState(true);
+  const [activeOption, setActiveOption] = useState<string>("LONG");
+
+  const handleToggle = (option: string) => {
+    setActiveOption(option);
+  };
+
   return (
     <div className="w-full max-w-sm bg-deepCharcoal text-white p-4 rounded-md">
-      <TradeToggle
-        isLong={isLong}
-        onToggle={(type) => setIsLong(type === "long")}
-      />
+      <TradeToggle activeOption={activeOption} onToggle={handleToggle} />
       <OrderTypeAndPrice />
       <OrderSizeInput />
       <LeverageSlider />
       <TradeDetails />
-      <TradeActionButton isLong={isLong} />
+      <TradeActionButton isLong={activeOption === "LONG"} />
     </div>
   );
 };

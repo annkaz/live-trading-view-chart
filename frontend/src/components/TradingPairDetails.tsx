@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import EthereumIcon from "../assets/EthereumIcon";
 import { useWebSocket } from "../context/WebSocketProvider";
 import { fetchTradingPairInfo } from "../services/vestApi";
+import Dropdown from "../ui/Dropdown";
 
 const DEFAULT_SYMBOL = "ETH-PERP";
 
@@ -69,10 +70,22 @@ const TradingPairDetails = () => {
 
   return (
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">
-      <div className="flex items-center space-x-2">
+      {/* <div className="flex items-center space-x-2">
         <EthereumIcon />
         <span className="font-semibold">{selectedSymbol}</span>
-      </div>
+      </div> */}
+      <Dropdown
+        options={availableSymbols.map((symbol) =>
+          symbol.replace("-PERP", "/USDC").toUpperCase()
+        )}
+        selected={selectedSymbol}
+        onSelect={() =>
+          setSelectedSymbol(
+            selectedSymbol.replace("/USDC", "-PERP").toUpperCase()
+          )
+        }
+        label="Order type"
+      />
       <div>
         <div className="text-sm text-gray-400">PRICE</div>
         <div className="font-semibold">${pairData.price}</div>

@@ -46,7 +46,6 @@ const CandlestickChart = () => {
               emoji: reaction.emoji,
             }))
         );
-        console.log("got reat", parsedReactions);
         setReactions(parsedReactions);
       } catch (error) {
         console.error("Failed to load emoji reactions:", error);
@@ -91,18 +90,11 @@ const CandlestickChart = () => {
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
 
-    console.log("Drop event fired");
-
     if (
       !chartRef.current ||
       !candlestickSeriesRef.current ||
       !draggedEmoji.current
     ) {
-      console.warn("Drop preconditions failed", {
-        chartRef: chartRef.current,
-        candlestickSeriesRef: candlestickSeriesRef.current,
-        draggedEmoji: draggedEmoji.current,
-      });
       return;
     }
 
@@ -116,15 +108,11 @@ const CandlestickChart = () => {
 
     const price = candlestickSeriesRef.current?.coordinateToPrice(y);
 
-    console.log("Mouse coordinates:", { x, y });
-    console.log("Mapped time:", time, "Mapped price:", price);
-
     if (time && price) {
       const currentEmoji = draggedEmoji.current;
       draggedEmoji.current = null;
 
       const newReaction = { time, price, emoji: currentEmoji };
-      console.log("New reaction:", newReaction);
 
       try {
         await addReaction({
@@ -159,13 +147,6 @@ const CandlestickChart = () => {
             const yCoordinate = candlestickSeriesRef.current?.priceToCoordinate(
               reaction.price
             );
-
-            console.log("react", {
-              isChartReady,
-              reaction,
-              xCoordinate,
-              yCoordinate,
-            });
 
             return (
               xCoordinate &&

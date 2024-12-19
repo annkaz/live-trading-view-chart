@@ -58,15 +58,14 @@ The project has two parts: the frontend (FE) and the backend (BE). Follow these 
 1. Navigate to the backend directory:
    ```bash
    cd backend
-
    ```
 2. Install the dependencies:
-   ```npm install
-
+   ```bash
+   npm install
    ```
 3. Start the development server:
-   ```npm run dev
-
+   ```bash
+   npm run dev
    ```
 
 #### **Frontend Setup**
@@ -74,15 +73,14 @@ The project has two parts: the frontend (FE) and the backend (BE). Follow these 
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
-
    ```
 2. Install the dependencies:
-   ```npm install
-
+   ```bash
+   npm install
    ```
 3. Start the development server:
-   ```npm start
-
+   ```bash
+   npm start
    ```
 
 Once both the frontend and backend servers are running, you can access the application in your browser. By default, the frontend server runs on http://localhost:3000. Ensure the backend server is also running to handle API requests (http://localhost:3001).

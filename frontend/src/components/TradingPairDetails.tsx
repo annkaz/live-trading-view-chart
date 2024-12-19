@@ -1,4 +1,6 @@
+/* eslint-disable eqeqeq */
 import { useEffect, useState } from "react";
+import { useTradingPair } from "../context/TradingPairProvider";
 import { useWebSocket } from "../context/WebSocketProvider";
 import { fetchTradingPairInfo } from "../services/vestApi";
 import Dropdown from "../ui/Dropdown";
@@ -25,15 +27,14 @@ const TradingPairDetails = () => {
   const [availableSymbols, setAvailableSymbols] = useState<TradingPairSymbol[]>(
     []
   );
-  const [selectedSymbol, setSelectedSymbol] =
-    useState<TradingPairSymbol>(DEFAULT_SYMBOL);
+  const { selectedPair, setSelectedPair } = useTradingPair();
 
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const data = await fetchTradingPairInfo(selectedSymbol.value);
+        const data = await fetchTradingPairInfo(selectedPair.value);
         setPairData(data);
       } catch (error) {
         console.error("Error fetching trading pair info:", error);
@@ -41,7 +42,7 @@ const TradingPairDetails = () => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [selectedPair]);
 
   useEffect(() => {
     const handleWebSocketUpdate = (data: any[]) => {
@@ -55,7 +56,7 @@ const TradingPairDetails = () => {
         prev.length === 0 ? Array.from(new Set(symbols)) : prev
       );
 
-      const ticker = data.find((item: any) => item.symbol === selectedSymbol);
+      const ticker = data.find((item: any) => item.symbol === selectedPair);
       if (ticker) {
         setPairData((prevData) => ({
           ...prevData,
@@ -72,12 +73,12 @@ const TradingPairDetails = () => {
     return () => {
       subscribe("tickers", () => {});
     };
-  }, [subscribe]);
+  }, [subscribe, selectedPair]);
 
   // Update the document title whenever the price changes
   useEffect(() => {
-    document.title = `${pairData?.price} | ${selectedSymbol.value} | Vest`;
-  }, [pairData?.price, selectedSymbol]);
+    document.title = `${pairData?.price ?? ""} | ${selectedPair.value} | Vest`;
+  }, [pairData?.price, selectedPair]);
 
   if (!pairData) return null;
 
@@ -85,30 +86,31 @@ const TradingPairDetails = () => {
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">
       <Dropdown
         options={availableSymbols}
-        selected={selectedSymbol}
-        onSelect={setSelectedSymbol}
+        selected={selectedPair}
+        onSelect={setSelectedPair}
         label="Order type"
       />
       <div>
         <div className="text-sm text-gray-400">PRICE</div>
         <div className="font-semibold">${pairData.price}</div>
       </div>
-      {pairData.dailyPriceChange && pairData.dailyPriceChangePercent && (
-        <div>
-          <div className="text-sm text-gray-400">24H CHANGE</div>
-          <div
-            className={`font-semibold ${
-              pairData.dailyPriceChange.startsWith("-")
-                ? "text-red"
-                : "text-teal"
-            }`}
-          >
-            {`${parseFloat(pairData.dailyPriceChange).toFixed(3)}/${
-              pairData.dailyPriceChangePercent
-            }%`}
+      {pairData.dailyPriceChange != null &&
+        pairData.dailyPriceChangePercent != null && (
+          <div>
+            <div className="text-sm text-gray-400">24H CHANGE</div>
+            <div
+              className={`font-semibold ${
+                pairData.dailyPriceChange.startsWith("-")
+                  ? "text-red"
+                  : "text-teal"
+              }`}
+            >
+              {`${parseFloat(pairData.dailyPriceChange).toFixed(3)}/${
+                pairData.dailyPriceChangePercent
+              }%`}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       <div>
         <div className="text-sm text-gray-400">1H FUNDING</div>
         <div className="font-semibold text-teal">

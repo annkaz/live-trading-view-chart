@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import TradingPairProvider from "./context/TradingPairProvider";
 import { WebSocketProvider } from "./context/WebSocketProvider";
 import reportWebVitals from "./reportWebVitals";
 
@@ -16,7 +17,9 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <WebSocketProvider>
-        <App />
+        <TradingPairProvider>
+          <App />
+        </TradingPairProvider>
       </WebSocketProvider>
     </QueryClientProvider>
   </React.StrictMode>

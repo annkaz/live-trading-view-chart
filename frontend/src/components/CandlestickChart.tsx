@@ -5,11 +5,10 @@ import {
   UTCTimestamp,
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
+import { useTradingPair } from "../context/TradingPairProvider";
 import { useKlines } from "../hooks/useKlines";
 import { addReaction, EmojiReaction, fetchReactions } from "../services/api";
 import EmojiSidebar from "./EmojiSidebar";
-
-const SYMBOL = "ETH-PERP";
 
 type Reaction = { time: UTCTimestamp; price: number; emoji: string };
 
@@ -21,6 +20,8 @@ const CandlestickChart = () => {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [isChartReady, setIsChartReady] = useState(false);
   const draggedEmoji = useRef<string | null>(null);
+
+  const { selectedPair } = useTradingPair();
 
   const handleInitialKlinesData = (initialData: any) => {
     candlestickSeriesRef.current?.setData(initialData);
@@ -81,7 +82,11 @@ const CandlestickChart = () => {
     return () => chart.remove();
   }, []);
 
-  useKlines(SYMBOL, handleInitialKlinesData, handleKlinesDataUpdate);
+  useKlines(
+    selectedPair.value,
+    handleInitialKlinesData,
+    handleKlinesDataUpdate
+  );
 
   const handleDragStart = (e: React.DragEvent, emoji: string) => {
     draggedEmoji.current = emoji;

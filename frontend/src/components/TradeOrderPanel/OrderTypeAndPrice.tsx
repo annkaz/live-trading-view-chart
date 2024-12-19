@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useTradingPair } from "../../context/TradingPairProvider";
+import { useTickers } from "../../hooks/useTickers";
 import Dropdown, { DropdownOption } from "../../ui/Dropdown";
 
 const DEFAULT_ORDER_TYPE = { value: "market", label: "MARKET" };
@@ -10,6 +12,18 @@ const AVAILABLE_ORDER_TYPES = [
 const OrderTypeAndPrice = () => {
   const [orderType, setOrderType] =
     useState<DropdownOption>(DEFAULT_ORDER_TYPE);
+  const [currPrice, setCurrPrice] = useState<string>();
+
+  const tickers = useTickers();
+  const { selectedPair } = useTradingPair();
+
+  useEffect(() => {
+    if (!tickers.length || !selectedPair.value) return;
+
+    setCurrPrice(
+      tickers.find((ticker) => ticker.symbol === selectedPair.value)?.markPrice
+    );
+  }, [tickers, selectedPair]);
 
   return (
     <div className="relative mb-4">
@@ -23,7 +37,7 @@ const OrderTypeAndPrice = () => {
 
         <div className="text-right">
           <p className="text-gray-400 text-sm mb-1">Open Price</p>
-          <p className="text-white font-medium">30,021.29</p>
+          <p className="text-white font-medium">{currPrice}</p>
           <p className="text-gray-400 text-xs">USDC</p>
         </div>
       </div>

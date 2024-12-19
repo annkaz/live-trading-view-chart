@@ -3,15 +3,20 @@ import { useTradingPair } from "../../context/TradingPairProvider";
 import { useTickers } from "../../hooks/useTickers";
 import Dropdown, { DropdownOption } from "../../ui/Dropdown";
 
-const DEFAULT_ORDER_TYPE = { value: "market", label: "MARKET" };
 const AVAILABLE_ORDER_TYPES = [
   { value: "market", label: "MARKET" },
   { value: "limit", label: "LIMIT" },
 ];
 
-const OrderTypeAndPrice = () => {
-  const [orderType, setOrderType] =
-    useState<DropdownOption>(DEFAULT_ORDER_TYPE);
+type OrderTypeAndPriceProps = {
+  orderType: DropdownOption;
+  onTypeChange: (type: DropdownOption) => void;
+};
+
+const OrderTypeAndPrice: React.FC<OrderTypeAndPriceProps> = ({
+  orderType,
+  onTypeChange,
+}) => {
   const [currPrice, setCurrPrice] = useState<string>();
 
   const tickers = useTickers();
@@ -31,7 +36,7 @@ const OrderTypeAndPrice = () => {
         <Dropdown
           options={AVAILABLE_ORDER_TYPES}
           selected={orderType}
-          onSelect={setOrderType}
+          onSelect={onTypeChange}
           label="Order type"
         />
 

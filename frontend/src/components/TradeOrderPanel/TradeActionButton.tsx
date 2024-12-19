@@ -35,7 +35,9 @@ const TradeActionButton: React.FC<TradeActionButtonProps> = ({ isLong }) => {
   return (
     <button
       ref={buttonRef}
-      className="w-full bg-teal text-black py-2 rounded-sm"
+      className={`w-full ${
+        isLong ? "bg-teal" : "bg-red"
+      } text-black py-2 rounded-sm`}
       onClick={handleBuyClick}
     >
       {isLong ? "BUY / LONG" : "SELL / SHORT"}

@@ -2,17 +2,13 @@
 import { useEffect, useState } from "react";
 import { useTradingPair } from "../context/TradingPairProvider";
 import { useWebSocket } from "../context/WebSocketProvider";
+import { useTickers } from "../hooks/useTickers";
 import { fetchTradingPairInfo } from "../services/vestApi";
 import Dropdown from "../ui/Dropdown";
 
 type TradingPairSymbol = {
   label: string;
   value: string;
-};
-
-const DEFAULT_SYMBOL: TradingPairSymbol = {
-  value: "ETH-PERP",
-  label: "ETH / USDC",
 };
 
 type PairData = {
@@ -28,8 +24,7 @@ const TradingPairDetails = () => {
     []
   );
   const { selectedPair, setSelectedPair } = useTradingPair();
-
-  const { subscribe } = useWebSocket();
+  const tickers = useTickers();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -45,35 +40,32 @@ const TradingPairDetails = () => {
   }, [selectedPair]);
 
   useEffect(() => {
-    const handleWebSocketUpdate = (data: any[]) => {
-      // Fetch data for available symbols dropdown
-      const symbols = data.map((item: any) => ({
-        value: item.symbol,
-        label: item.symbol.replace("-PERP", " / USDC"),
-      }));
-      // Make sure to populate only once
-      setAvailableSymbols((prev) =>
-        prev.length === 0 ? Array.from(new Set(symbols)) : prev
-      );
+    if (!tickers.length || !selectedPair.value) return;
 
-      const ticker = data.find((item: any) => item.symbol === selectedPair);
-      if (ticker) {
-        setPairData((prevData) => ({
-          ...prevData,
-          price: ticker.markPrice,
-          dailyPriceChange: ticker.priceChange,
-          dailyPriceChangePercent: ticker.priceChangePercent,
-          oneHrFundingRate: ticker.oneHrFundingRate,
-        }));
-      }
-    };
+    // Fetch data for available symbols dropdown
+    const symbols = tickers.map((item: any) => ({
+      value: item.symbol,
+      label: item.symbol.replace("-PERP", " / USDC"),
+    }));
+    // Make sure to populate only once
+    setAvailableSymbols((prev) =>
+      prev.length === 0 ? Array.from(new Set(symbols)) : prev
+    );
 
-    subscribe("tickers", handleWebSocketUpdate);
+    const ticker = tickers.find(
+      (item: any) => item.symbol === selectedPair.value
+    );
 
-    return () => {
-      subscribe("tickers", () => {});
-    };
-  }, [subscribe, selectedPair]);
+    if (ticker) {
+      let updatedPairData = {
+        price: ticker.markPrice,
+        dailyPriceChange: ticker.priceChange,
+        dailyPriceChangePercent: ticker.priceChangePercent,
+        oneHrFundingRate: ticker.oneHrFundingRate,
+      };
+      setPairData(updatedPairData);
+    }
+  }, [tickers, selectedPair]);
 
   // Update the document title whenever the price changes
   useEffect(() => {

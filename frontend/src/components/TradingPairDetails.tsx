@@ -1,7 +1,6 @@
 /* eslint-disable eqeqeq */
 import { useEffect, useState } from "react";
 import { useTradingPair } from "../context/TradingPairProvider";
-import { useWebSocket } from "../context/WebSocketProvider";
 import { useTickers } from "../hooks/useTickers";
 import { fetchTradingPairInfo } from "../services/vestApi";
 import Dropdown from "../ui/Dropdown";

@@ -23,7 +23,7 @@ const TradeOrderPanel = () => {
   };
 
   return (
-    <div className="w-full max-w-sm bg-deepCharcoal text-white p-4 rounded-md">
+    <div className="h-full flex-grow w-full max-w-sm bg-deepCharcoal text-white p-4 rounded-md">
       <TradeToggle activeOption={activeOption} onToggle={handleTabToggle} />
       <OrderTypeAndPrice
         orderType={orderType}

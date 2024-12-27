@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-appBackground text-appText font-mono antialiased box-border m-0 py-4 px-8;
+  @apply bg-appBackground text-appText font-mono antialiased box-border m-0 px-8 h-full w-full;
 }
 
 code {

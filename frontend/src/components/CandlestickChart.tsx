@@ -60,8 +60,6 @@ const CandlestickChart = () => {
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: 500,
       layout: {
         background: { color: "#161514" },
         textColor: "#AEADAD",
@@ -73,13 +71,27 @@ const CandlestickChart = () => {
       timeScale: {
         timeVisible: true,
       },
+      autoSize: true,
     });
 
     chartRef.current = chart;
     const candlestickSeries = chart.addCandlestickSeries();
     candlestickSeriesRef.current = candlestickSeries;
 
-    return () => chart.remove();
+    // Observe container size changes
+    const resizeObserver = new ResizeObserver(() => {
+      if (chartContainerRef.current) {
+        const { offsetWidth, offsetHeight } = chartContainerRef.current;
+        chart.resize(offsetWidth, offsetHeight);
+      }
+    });
+
+    resizeObserver.observe(chartContainerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+      chart.remove();
+    };
   }, []);
 
   useKlines(
@@ -137,9 +149,9 @@ const CandlestickChart = () => {
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
   return (
-    <div className="flex flex-col flex-1 gap-4">
+    <div className="flex flex-col flex-grow h-full gap-4">
       <div
-        className="relative"
+        className="relative flex-grow min-h-[500px] w-full"
         ref={chartContainerRef}
         onDrop={handleDrop}
         onDragOver={handleDragOver}

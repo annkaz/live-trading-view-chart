@@ -14,7 +14,7 @@ const Main = () => {
     <div>
       <TradingPairDetails />
       <PriceFundingToggle activeTab={activeTab} onToggle={handleTabToggle} />
-      <div className="flex flex-row gap-4">
+      <div className="flex gap-4 h-full">
         <CandlestickChart />
         <TradeOrderPanel />
       </div>

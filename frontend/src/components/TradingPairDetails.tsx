@@ -71,8 +71,6 @@ const TradingPairDetails = () => {
     document.title = `${pairData?.price ?? ""} | ${selectedPair.value} | Vest`;
   }, [pairData?.price, selectedPair]);
 
-  if (!pairData) return null;
-
   return (
     <div className="flex w-full items-center justify-between p-4 border-b border-gray-700">
       <Dropdown
@@ -81,40 +79,46 @@ const TradingPairDetails = () => {
         onSelect={setSelectedPair}
         label="Order type"
       />
-      <div>
+      <div className="w-40">
         <div className="text-sm text-gray-400">PRICE</div>
-        <div className="font-semibold">${pairData.price}</div>
-      </div>
-      {pairData.dailyPriceChange != null &&
-        pairData.dailyPriceChangePercent != null && (
-          <div>
-            <div className="text-sm text-gray-400">24H CHANGE</div>
-            <div
-              className={`font-semibold ${
-                pairData.dailyPriceChange.startsWith("-")
-                  ? "text-red"
-                  : "text-teal"
-              }`}
-            >
-              {`${parseFloat(pairData.dailyPriceChange).toFixed(3)}/${
-                pairData.dailyPriceChangePercent
-              }%`}
-            </div>
-          </div>
-        )}
-      <div>
-        <div className="text-sm text-gray-400">1H FUNDING</div>
-        <div className="font-semibold text-teal">
-          {pairData.oneHrFundingRate}%
+        <div className="truncate font-semibold">
+          {pairData?.price != null ? `$${pairData?.price}` : "-"}
         </div>
       </div>
-      <div>
-        <div className="text-sm text-gray-400">LONG OPEN INTEREST</div>
-        <div className="font-semibold text-teal">8.871 ETH</div>
+      <div className="w-40">
+        <div className="text-sm text-gray-400">24H CHANGE</div>
+        {pairData?.dailyPriceChange != null &&
+        pairData?.dailyPriceChangePercent != null ? (
+          <div
+            className={`truncate font-semibold ${
+              pairData.dailyPriceChange.startsWith("-")
+                ? "text-red"
+                : "text-teal"
+            }`}
+          >
+            {`${parseFloat(pairData.dailyPriceChange).toFixed(3)}/${
+              pairData?.dailyPriceChangePercent
+            }%`}
+          </div>
+        ) : (
+          <div className="font-semibold">{`- / -`}</div>
+        )}
       </div>
-      <div>
+      <div className="w-40">
+        <div className="text-sm text-gray-400">1H FUNDING</div>
+        <div className="truncate font-semibold text-teal">
+          {pairData?.oneHrFundingRate != null
+            ? `${pairData.oneHrFundingRate}%`
+            : "-"}
+        </div>
+      </div>
+      <div className="w-40">
+        <div className="text-sm text-gray-400">LONG OPEN INTEREST</div>
+        <div className="truncate font-semibold text-teal">8.871 ETH</div>
+      </div>
+      <div className="w-40">
         <div className="text-sm text-gray-400">SHORT OPEN INTEREST</div>
-        <div className="font-semibold text-teal">8.871 ETH</div>
+        <div className="truncate font-semibold text-teal">8.871 ETH</div>
       </div>
     </div>
   );

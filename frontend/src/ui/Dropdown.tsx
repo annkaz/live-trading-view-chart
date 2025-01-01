@@ -11,6 +11,7 @@ type DropdownProps = {
   selected: DropdownOption;
   onSelect: (value: DropdownOption) => void;
   label?: string;
+  unstyled?: boolean;
 };
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -18,6 +19,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   selected,
   onSelect,
   label,
+  unstyled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -54,11 +56,15 @@ const Dropdown: React.FC<DropdownProps> = ({
     <div ref={dropdownRef} className="relative">
       {label && <p className="text-gray-400 text-sm mb-1">{label}</p>}
       <div
-        className="relative bg-gray-800 p-2 rounded-md text-white w-36 cursor-pointer flex justify-between items-center"
+        className={
+          unstyled
+            ? "relative text-white w-8 cursor-pointer"
+            : "relative bg-gray-800 p-2 rounded-md text-white w-36 cursor-pointer flex justify-between items-center"
+        }
         onClick={toggleDropdown}
       >
         <span>{selected.label}</span>
-        {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+        {!unstyled && (isOpen ? <FiChevronUp /> : <FiChevronDown />)}
       </div>
 
       {isOpen && (

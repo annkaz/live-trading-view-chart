@@ -8,9 +8,30 @@ import { useEffect, useRef, useState } from "react";
 import { useTradingPair } from "../context/TradingPairProvider";
 import { useKlines } from "../hooks/useKlines";
 import { addReaction, EmojiReaction, fetchReactions } from "../services/api";
+import Dropdown, { DropdownOption } from "../ui/Dropdown";
 import EmojiSidebar from "./EmojiSidebar";
 
 type Reaction = { time: UTCTimestamp; price: number; emoji: string };
+
+const SUPPORTED_INTERVALS: DropdownOption[] = [
+  { value: "1m", label: "1m" },
+  { value: "3m", label: "3m" },
+  { value: "5m", label: "5m" },
+  { value: "15m", label: "15m" },
+  { value: "30m", label: "30m" },
+  { value: "1h", label: "1h" },
+  { value: "2h", label: "2h" },
+  { value: "4h", label: "4h" },
+  { value: "6h", label: "6h" },
+  { value: "8h", label: "8h" },
+  { value: "12h", label: "12h" },
+  { value: "1d", label: "1d" },
+  { value: "3d", label: "3d" },
+  { value: "1w", label: "1w" },
+  { value: "1M", label: "1M" },
+];
+
+const DEFAULT_INTERVAL = SUPPORTED_INTERVALS[0];
 
 const CandlestickChart = () => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -19,6 +40,7 @@ const CandlestickChart = () => {
 
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [isChartReady, setIsChartReady] = useState(false);
+  const [klinesInterval, setKlinesInterval] = useState(DEFAULT_INTERVAL);
   const draggedEmoji = useRef<string | null>(null);
 
   const { selectedPair } = useTradingPair();
@@ -150,39 +172,48 @@ const CandlestickChart = () => {
 
   return (
     <div className="flex flex-col flex-grow h-full gap-4">
-      <div
-        className="relative flex-grow min-h-[500px] w-full"
-        ref={chartContainerRef}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        {isChartReady &&
-          reactions.map((reaction, index) => {
-            const xCoordinate = chartRef.current
-              ?.timeScale()
-              ?.timeToCoordinate(reaction.time);
-            const yCoordinate = candlestickSeriesRef.current?.priceToCoordinate(
-              reaction.price
-            );
+      <div>
+        <div className="p-4 bg-deepCharcoal">
+          <Dropdown
+            options={SUPPORTED_INTERVALS}
+            selected={klinesInterval}
+            onSelect={setKlinesInterval}
+            unstyled
+          />
+        </div>
+        <div
+          className="relative flex-grow min-h-[500px] w-full"
+          ref={chartContainerRef}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {isChartReady &&
+            reactions.map((reaction, index) => {
+              const xCoordinate = chartRef.current
+                ?.timeScale()
+                ?.timeToCoordinate(reaction.time);
+              const yCoordinate =
+                candlestickSeriesRef.current?.priceToCoordinate(reaction.price);
 
-            return (
-              xCoordinate &&
-              yCoordinate && (
-                <div
-                  key={index}
-                  className="absolute text-2xl pointer-events-none"
-                  style={{
-                    left: `${xCoordinate}px`,
-                    top: `${yCoordinate}px`,
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 10,
-                  }}
-                >
-                  {reaction.emoji}
-                </div>
-              )
-            );
-          })}
+              return (
+                xCoordinate &&
+                yCoordinate && (
+                  <div
+                    key={index}
+                    className="absolute text-2xl pointer-events-none"
+                    style={{
+                      left: `${xCoordinate}px`,
+                      top: `${yCoordinate}px`,
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                    }}
+                  >
+                    {reaction.emoji}
+                  </div>
+                )
+              );
+            })}
+        </div>
       </div>
       <EmojiSidebar onDragStart={handleDragStart} />
     </div>

@@ -3,12 +3,7 @@ import { useEffect, useState } from "react";
 import { useTradingPair } from "../context/TradingPairProvider";
 import { useTickers } from "../hooks/useTickers";
 import { fetchTradingPairInfo } from "../services/vestApi";
-import Dropdown from "../ui/Dropdown";
-
-type TradingPairSymbol = {
-  label: string;
-  value: string;
-};
+import Dropdown, { DropdownOption } from "../ui/Dropdown";
 
 type PairData = {
   price: string;
@@ -19,7 +14,7 @@ type PairData = {
 
 const TradingPairDetails = () => {
   const [pairData, setPairData] = useState<PairData | null>(null);
-  const [availableSymbols, setAvailableSymbols] = useState<TradingPairSymbol[]>(
+  const [availableSymbols, setAvailableSymbols] = useState<DropdownOption[]>(
     []
   );
   const { selectedPair, setSelectedPair } = useTradingPair();

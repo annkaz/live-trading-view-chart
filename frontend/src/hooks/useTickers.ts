@@ -14,7 +14,7 @@ type TickerData = {
 
 export const useTickers = () => {
   const [tickers, setTickers] = useState<TickerData[]>([]);
-  const { subscribe } = useWebSocket();
+  const { subscribe, unsubscribe } = useWebSocket();
 
   useEffect(() => {
     const handleTickerUpdate = (data: any) => {
@@ -24,7 +24,7 @@ export const useTickers = () => {
     subscribe("tickers", handleTickerUpdate);
 
     return () => {
-      subscribe("tickers", () => {});
+      unsubscribe("tickers", handleTickerUpdate);
     };
   }, [subscribe]);
 

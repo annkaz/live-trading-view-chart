@@ -6,16 +6,23 @@ import { fetchCandlestickData } from "../services/vestApi";
 
 export const useKlines = (
   symbol: string,
+  interval: string,
   onInitialData: (data: any[]) => void,
   onUpdate: (newCandle: any) => void
 ) => {
-  const { subscribe } = useWebSocket();
+  const { subscribe, unsubscribe } = useWebSocket();
 
   // Fetch initial data
-  const { data, isSuccess, isError, error } = useQuery({
-    queryKey: ["candlestickData", symbol],
-    queryFn: () => fetchCandlestickData(symbol),
+  const { data, isSuccess, isError, error, refetch } = useQuery({
+    queryKey: ["candlestickData", symbol, interval],
+    queryFn: () => fetchCandlestickData(symbol, interval),
   });
+
+  // Refetch intial data once the symbol or interval changes
+  useEffect(() => {
+    onInitialData([]);
+    refetch();
+  }, [symbol, interval, refetch]);
 
   useEffect(() => {
     if (isSuccess && data) {
@@ -27,6 +34,7 @@ export const useKlines = (
 
   // Subscribe to WebSocket updates
   useEffect(() => {
+    const channel = `${symbol}@kline_${interval}`;
     const handleWebSocketUpdate = (data: any) => {
       const newCandle = {
         time: Math.floor(data[0] / 1000) as UTCTimestamp,
@@ -38,10 +46,10 @@ export const useKlines = (
       onUpdate(newCandle);
     };
 
-    subscribe(`${symbol}@kline_1m`, handleWebSocketUpdate);
+    subscribe(channel, handleWebSocketUpdate);
 
     return () => {
-      subscribe(`${symbol}@kline_1m`, () => {});
+      unsubscribe(channel, handleWebSocketUpdate);
     };
-  }, [symbol, subscribe, onUpdate]);
+  }, [symbol, subscribe, unsubscribe, onUpdate, interval]);
 };

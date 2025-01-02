@@ -108,10 +108,11 @@ export const fetchTradingPairInfo = async (
 
 export const fetchCandlestickData = async (
   symbol: string,
+  interval: string,
   limit: number = 1000
 ): Promise<CandlestickData[]> => {
   const response = await fetch(
-    `${VEST_API}/klines?symbol=${symbol}&interval=1m&limit=${limit}`,
+    `${VEST_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`,
     {
       method: "GET",
       headers: {

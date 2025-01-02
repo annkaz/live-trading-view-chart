@@ -5,6 +5,7 @@ const X_WEBSOCKET_SERVER = "restserver0";
 
 type WebSocketContextType = {
   subscribe: (channel: string, callback: (data: any) => void) => void;
+  unsubscribe: (channel: string, callback: (data: any) => void) => void;
 };
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -69,8 +70,31 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const unsubscribe = (channel: string, callback: (data: any) => void) => {
+    if (!subscriptionsRef.current[channel]) return;
+
+    // Remove the specific callback from the channel
+    subscriptionsRef.current[channel] = subscriptionsRef.current[
+      channel
+    ].filter((cb) => cb !== callback);
+
+    // If no more callbacks for this channel, send UNSUBSCRIBE message
+    if (subscriptionsRef.current[channel].length === 0) {
+      delete subscriptionsRef.current[channel];
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(
+          JSON.stringify({
+            method: "UNSUBSCRIBE",
+            params: [channel],
+            id: Date.now(),
+          })
+        );
+      }
+    }
+  };
+
   return (
-    <WebSocketContext.Provider value={{ subscribe }}>
+    <WebSocketContext.Provider value={{ subscribe, unsubscribe }}>
       {children}
     </WebSocketContext.Provider>
   );

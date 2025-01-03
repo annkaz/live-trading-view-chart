@@ -26,7 +26,7 @@ export const useTickers = () => {
     return () => {
       unsubscribe("tickers", handleTickerUpdate);
     };
-  }, [subscribe]);
+  }, [subscribe, unsubscribe]);
 
   return tickers;
 };

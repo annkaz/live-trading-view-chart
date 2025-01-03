@@ -45,14 +45,14 @@ const CandlestickChart = () => {
 
   const { selectedPair } = useTradingPair();
 
-  const handleInitialKlinesData = (initialData: any) => {
+  const handleInitialKlinesData = useCallback((initialData: any) => {
     candlestickSeriesRef.current?.setData(initialData);
     setIsChartReady(initialData.length ? true : false);
-  };
+  }, []);
 
-  const handleKlinesDataUpdate = (newCandle: any) => {
+  const handleKlinesDataUpdate = useCallback((newCandle: any) => {
     candlestickSeriesRef.current?.update(newCandle);
-  };
+  }, []);
 
   useEffect(() => {
     if (!isChartReady) return;

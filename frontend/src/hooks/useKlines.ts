@@ -22,7 +22,7 @@ export const useKlines = (
   useEffect(() => {
     onInitialData([]);
     refetch();
-  }, [symbol, interval, refetch]);
+  }, [symbol, interval, refetch, onInitialData]);
 
   useEffect(() => {
     if (isSuccess && data) {

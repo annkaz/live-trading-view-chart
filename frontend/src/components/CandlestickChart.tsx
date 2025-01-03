@@ -1,17 +1,24 @@
 import {
+  Coordinate,
   createChart,
   IChartApi,
   ISeriesApi,
   UTCTimestamp,
 } from "lightweight-charts";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTradingPair } from "../context/TradingPairProvider";
 import { useKlines } from "../hooks/useKlines";
 import { addReaction, EmojiReaction, fetchReactions } from "../services/api";
 import Dropdown, { DropdownOption } from "../ui/Dropdown";
 import EmojiSidebar from "./EmojiSidebar";
 
-type Reaction = { time: UTCTimestamp; price: number; emoji: string };
+type Reaction = {
+  time: UTCTimestamp;
+  price: number;
+  emoji: string;
+  xCoordinate?: Coordinate | null;
+  yCoordinate?: Coordinate | null;
+};
 
 const SUPPORTED_INTERVALS: DropdownOption[] = [
   { value: "1m", label: "1m" },
@@ -31,6 +38,7 @@ const CandlestickChart = () => {
   const chartRef = useRef<IChartApi | null>(null);
 
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [renderedReactions, setRenderedReactions] = useState<Reaction[]>([]);
   const [isChartReady, setIsChartReady] = useState(false);
   const [klinesInterval, setKlinesInterval] = useState(DEFAULT_INTERVAL);
   const draggedEmoji = useRef<string | null>(null);
@@ -39,7 +47,7 @@ const CandlestickChart = () => {
 
   const handleInitialKlinesData = (initialData: any) => {
     candlestickSeriesRef.current?.setData(initialData);
-    setIsChartReady(true);
+    setIsChartReady(initialData.length ? true : false);
   };
 
   const handleKlinesDataUpdate = (newCandle: any) => {
@@ -108,6 +116,41 @@ const CandlestickChart = () => {
     };
   }, []);
 
+  const updateReactionPositions = useCallback(() => {
+    if (!chartRef.current || !candlestickSeriesRef.current) return;
+
+    const updatedReactions = reactions
+      .map((reaction) => {
+        const xCoordinate = chartRef.current
+          ?.timeScale()
+          ?.timeToCoordinate(reaction.time);
+        const yCoordinate = candlestickSeriesRef.current?.priceToCoordinate(
+          reaction.price
+        );
+
+        return { ...reaction, xCoordinate, yCoordinate };
+      })
+      .filter(Boolean);
+
+    setRenderedReactions(updatedReactions);
+  }, [reactions]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      // Recalculate positions whenever the visible time range changes
+      const timeScale = chartRef.current.timeScale();
+
+      timeScale.subscribeVisibleTimeRangeChange(updateReactionPositions);
+
+      // Update positions initially
+      updateReactionPositions();
+
+      return () => {
+        timeScale.unsubscribeVisibleTimeRangeChange(updateReactionPositions);
+      };
+    }
+  }, [updateReactionPositions]);
+
   useKlines(
     selectedPair.value,
     klinesInterval.value,
@@ -175,35 +218,28 @@ const CandlestickChart = () => {
           />
         </div>
         <div
-          className="relative flex-grow min-h-[500px] w-full"
+          className="relative flex-grow min-h-[500px] w-full overflow-hidden"
           ref={chartContainerRef}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
           {isChartReady &&
-            reactions.map((reaction, index) => {
-              const xCoordinate = chartRef.current
-                ?.timeScale()
-                ?.timeToCoordinate(reaction.time);
-              const yCoordinate =
-                candlestickSeriesRef.current?.priceToCoordinate(reaction.price);
+            renderedReactions.map((reaction, index) => {
+              if (!reaction.xCoordinate || !reaction.yCoordinate) return null;
 
               return (
-                xCoordinate &&
-                yCoordinate && (
-                  <div
-                    key={index}
-                    className="absolute text-2xl pointer-events-none"
-                    style={{
-                      left: `${xCoordinate}px`,
-                      top: `${yCoordinate}px`,
-                      transform: "translate(-50%, -50%)",
-                      zIndex: 10,
-                    }}
-                  >
-                    {reaction.emoji}
-                  </div>
-                )
+                <div
+                  key={index}
+                  className="absolute text-2xl pointer-events-none"
+                  style={{
+                    left: `${reaction.xCoordinate}px`,
+                    top: `${reaction.yCoordinate}px`,
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 10,
+                  }}
+                >
+                  {reaction.emoji}
+                </div>
               );
             })}
         </div>
